@@ -174,150 +174,153 @@
     {{-- Create/Edit Modal --}}
     <x-ui-modal wire:model="showModal" size="lg" :title="$editingIssue ? 'Ausgabe bearbeiten' : 'Neue Ausgabe'">
         <div class="space-y-4">
-            {{-- Empfänger: Arbeitgeber → Mitarbeiter --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <x-ui-input-select
-                        name="modal_employer_id"
-                        wire:model.live="modal_employer_id"
-                        label="Arbeitgeber"
-                        :options="$this->employers->map(fn($e) => ['id' => $e->id, 'label' => $e->display_name])->toArray()"
-                        option-value="id"
-                        option-label="label"
-                        placeholder="Alle Arbeitgeber"
-                    />
-                </div>
-                <div>
-                    <x-ui-input-select
-                        name="recipient_id"
-                        wire:model="recipient_id"
-                        label="Mitarbeiter *"
-                        :options="$this->modalEmployees"
-                        option-value="id"
-                        option-label="label"
-                        placeholder="Mitarbeiter auswählen"
-                        required
-                    />
-                </div>
-            </div>
-
-            {{-- Typ --}}
-            <div>
+            {{-- 1. Typ-Auswahl (prominent) --}}
+            <div class="rounded-lg border border-[var(--ui-border)] bg-[var(--ui-muted-5)] p-4">
                 <x-ui-input-select
                     name="issue_type_id"
                     wire:model.live="issue_type_id"
-                    label="Typ *"
+                    label="Typ der Ausgabe *"
                     :options="$this->issueTypes->map(fn($t) => ['id' => $t->id, 'label' => $t->name])->toArray()"
                     option-value="id"
                     option-label="label"
-                    placeholder="Typ auswählen"
+                    placeholder="Bitte Typ auswählen…"
                     required
                 />
             </div>
 
-            {{-- Datum --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-ui-input-date
-                    name="issued_at"
-                    wire:model="issued_at"
-                    label="Ausgegeben am"
-                />
-                <x-ui-input-date
-                    name="returned_at"
-                    wire:model="returned_at"
-                    label="Zurückgegeben am"
-                />
-            </div>
-
-            {{-- Dynamische Felder aus Ausgabe-Typ --}}
-            @if($this->selectedIssueType && $this->selectedIssueType->field_definitions)
-                <div class="border-t border-[var(--ui-border)] pt-4 mt-4">
-                    <div class="space-y-4">
-                        @foreach($this->selectedIssueType->field_definitions as $field)
-                            @php
-                                $fieldKey = 'metadata.' . $field['key'];
-                                $isRequired = $field['required'] ?? false;
-                                $labelSuffix = $isRequired ? ' *' : '';
-                            @endphp
-
-                            @if($field['type'] === 'text')
-                                <x-ui-input-text
-                                    :name="$fieldKey"
-                                    wire:model="metadata.{{ $field['key'] }}"
-                                    :label="$field['label'] . $labelSuffix"
-                                    :placeholder="$field['placeholder'] ?? ''"
-                                    :required="$isRequired"
-                                />
-                            @elseif($field['type'] === 'textarea')
-                                <x-ui-input-textarea
-                                    :name="$fieldKey"
-                                    wire:model="metadata.{{ $field['key'] }}"
-                                    :label="$field['label'] . $labelSuffix"
-                                    :placeholder="$field['placeholder'] ?? ''"
-                                    :required="$isRequired"
-                                    :rows="$field['rows'] ?? 3"
-                                />
-                            @elseif($field['type'] === 'select')
-                                <x-ui-input-select
-                                    :name="$fieldKey"
-                                    wire:model="metadata.{{ $field['key'] }}"
-                                    :label="$field['label'] . $labelSuffix"
-                                    :options="$field['options'] ?? []"
-                                    option-value="value"
-                                    option-label="label"
-                                    :required="$isRequired"
-                                />
-                            @elseif($field['type'] === 'checkbox')
-                                <div class="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        id="field_{{ $field['key'] }}"
-                                        wire:model="metadata.{{ $field['key'] }}"
-                                        class="w-4 h-4"
-                                    />
-                                    <label for="field_{{ $field['key'] }}" class="text-sm">
-                                        {{ $field['label'] }}{{ $isRequired ? ' *' : '' }}
-                                    </label>
-                                </div>
-                            @elseif($field['type'] === 'date')
-                                <x-ui-input-date
-                                    :name="$fieldKey"
-                                    wire:model="metadata.{{ $field['key'] }}"
-                                    :label="$field['label'] . $labelSuffix"
-                                    :required="$isRequired"
-                                />
-                            @endif
-                        @endforeach
+            {{-- 2. Restliches Formular — erst sichtbar wenn Typ gewählt --}}
+            @if($this->issue_type_id)
+                {{-- Empfänger: Arbeitgeber → Mitarbeiter --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <x-ui-input-select
+                            name="modal_employer_id"
+                            wire:model.live="modal_employer_id"
+                            label="Arbeitgeber"
+                            :options="$this->employers->map(fn($e) => ['id' => $e->id, 'label' => $e->display_name])->toArray()"
+                            option-value="id"
+                            option-label="label"
+                            placeholder="Alle Arbeitgeber"
+                        />
+                    </div>
+                    <div>
+                        <x-ui-input-select
+                            name="recipient_id"
+                            wire:model="recipient_id"
+                            label="Mitarbeiter *"
+                            :options="$this->modalEmployees"
+                            option-value="id"
+                            option-label="label"
+                            placeholder="Mitarbeiter auswählen"
+                            required
+                        />
                     </div>
                 </div>
-            @endif
 
-            {{-- Notizen --}}
-            <div class="border-t border-[var(--ui-border)] pt-4 mt-4">
-                <x-ui-input-textarea
-                    name="notes"
-                    wire:model="notes"
-                    label="Notizen"
-                    placeholder="Zusätzliche Notizen..."
-                    rows="3"
-                />
-            </div>
-
-            {{-- Unterschrift --}}
-            @if($this->selectedIssueType && $this->selectedIssueType->requires_signature)
-                <div class="border-t border-[var(--ui-border)] pt-4 mt-4 w-full">
-                    <x-ui-input-signature
-                        name="signature_data"
-                        wire:model="signature_data"
-                        label="Unterschrift des Empfängers"
-                        :height="300"
+                {{-- Datum --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-ui-input-date
+                        name="issued_at"
+                        wire:model="issued_at"
+                        label="Ausgegeben am"
                     />
-                    @if($editingIssue && $editingIssue->signed_at)
-                        <div class="mt-2 text-sm text-[var(--ui-muted)]">
-                            Unterschrieben am {{ $editingIssue->signed_at->format('d.m.Y H:i') }} Uhr
-                        </div>
-                    @endif
+                    <x-ui-input-date
+                        name="returned_at"
+                        wire:model="returned_at"
+                        label="Zurückgegeben am"
+                    />
                 </div>
+
+                {{-- Dynamische Felder aus Ausgabe-Typ --}}
+                @if($this->selectedIssueType && $this->selectedIssueType->field_definitions)
+                    <div class="border-t border-[var(--ui-border)] pt-4 mt-4">
+                        <div class="space-y-4">
+                            @foreach($this->selectedIssueType->field_definitions as $field)
+                                @php
+                                    $fieldKey = 'metadata.' . $field['key'];
+                                    $isRequired = $field['required'] ?? false;
+                                    $labelSuffix = $isRequired ? ' *' : '';
+                                @endphp
+
+                                @if($field['type'] === 'text')
+                                    <x-ui-input-text
+                                        :name="$fieldKey"
+                                        wire:model="metadata.{{ $field['key'] }}"
+                                        :label="$field['label'] . $labelSuffix"
+                                        :placeholder="$field['placeholder'] ?? ''"
+                                        :required="$isRequired"
+                                    />
+                                @elseif($field['type'] === 'textarea')
+                                    <x-ui-input-textarea
+                                        :name="$fieldKey"
+                                        wire:model="metadata.{{ $field['key'] }}"
+                                        :label="$field['label'] . $labelSuffix"
+                                        :placeholder="$field['placeholder'] ?? ''"
+                                        :required="$isRequired"
+                                        :rows="$field['rows'] ?? 3"
+                                    />
+                                @elseif($field['type'] === 'select')
+                                    <x-ui-input-select
+                                        :name="$fieldKey"
+                                        wire:model="metadata.{{ $field['key'] }}"
+                                        :label="$field['label'] . $labelSuffix"
+                                        :options="$field['options'] ?? []"
+                                        option-value="value"
+                                        option-label="label"
+                                        :required="$isRequired"
+                                    />
+                                @elseif($field['type'] === 'checkbox')
+                                    <div class="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id="field_{{ $field['key'] }}"
+                                            wire:model="metadata.{{ $field['key'] }}"
+                                            class="w-4 h-4"
+                                        />
+                                        <label for="field_{{ $field['key'] }}" class="text-sm">
+                                            {{ $field['label'] }}{{ $isRequired ? ' *' : '' }}
+                                        </label>
+                                    </div>
+                                @elseif($field['type'] === 'date')
+                                    <x-ui-input-date
+                                        :name="$fieldKey"
+                                        wire:model="metadata.{{ $field['key'] }}"
+                                        :label="$field['label'] . $labelSuffix"
+                                        :required="$isRequired"
+                                    />
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Notizen --}}
+                <div class="border-t border-[var(--ui-border)] pt-4 mt-4">
+                    <x-ui-input-textarea
+                        name="notes"
+                        wire:model="notes"
+                        label="Notizen"
+                        placeholder="Zusätzliche Notizen..."
+                        rows="3"
+                    />
+                </div>
+
+                {{-- Unterschrift --}}
+                @if($this->selectedIssueType && $this->selectedIssueType->requires_signature)
+                    <div class="border-t border-[var(--ui-border)] pt-4 mt-4 w-full">
+                        <x-ui-input-signature
+                            name="signature_data"
+                            wire:model="signature_data"
+                            label="Unterschrift des Empfängers"
+                            :height="300"
+                        />
+                        @if($editingIssue && $editingIssue->signed_at)
+                            <div class="mt-2 text-sm text-[var(--ui-muted)]">
+                                Unterschrieben am {{ $editingIssue->signed_at->format('d.m.Y H:i') }} Uhr
+                            </div>
+                        @endif
+                    </div>
+                @endif
             @endif
         </div>
 

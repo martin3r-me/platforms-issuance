@@ -55,7 +55,7 @@ class Index extends Component
                 ->whereHas('recipient', fn($q2) => $q2->where('employer_id', $this->filterEmployer)))
             ->with(['type', 'recipient' => function ($morphTo) {
                 $morphTo->morphWith([
-                    \Platform\Hcm\Models\HcmEmployee::class => ['crmContactLinks.contact'],
+                    'hcm_employee' => ['crmContactLinks.contact'],
                 ]);
             }])
             ->orderBy('issued_at', 'desc')
