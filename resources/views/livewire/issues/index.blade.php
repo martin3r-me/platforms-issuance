@@ -10,7 +10,7 @@
                     <x-ui-input-select
                         name="filterEmployer"
                         wire:model.live="filterEmployer"
-                        :options="$this->employers->map(fn($e) => ['id' => $e->id, 'label' => $e->display_name])->toArray()"
+                        :options="$this->employers"
                         option-value="id"
                         option-label="label"
                         placeholder="Alle Arbeitgeber"
@@ -191,13 +191,14 @@
             {{-- 2. Restliches Formular — erst sichtbar wenn Typ gewählt --}}
             @if($this->issue_type_id)
                 {{-- Empfänger: Arbeitgeber → Mitarbeiter --}}
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <x-ui-input-select
                             name="modal_employer_id"
                             wire:model.live="modal_employer_id"
                             label="Arbeitgeber"
-                            :options="$this->employers->map(fn($e) => ['id' => $e->id, 'label' => $e->display_name])->toArray()"
+                            :options="$this->employers"
                             option-value="id"
                             option-label="label"
                             placeholder="Alle Arbeitgeber"
@@ -321,6 +322,14 @@
                         @endif
                     </div>
                 @endif
+            @else
+                <x-ui-info-banner
+                    icon="heroicon-o-information-circle"
+                    title="Hinweis"
+                    variant="info"
+                >
+                    Bitte wählen Sie zunächst einen Ausgabe-Typ aus, um das Formular anzuzeigen.
+                </x-ui-info-banner>
             @endif
         </div>
 

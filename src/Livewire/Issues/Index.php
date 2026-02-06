@@ -8,7 +8,7 @@ use Livewire\Attributes\On;
 use Platform\Issuance\Models\IssIssue;
 use Platform\Issuance\Models\IssIssueType;
 use Platform\Hcm\Models\HcmEmployee;
-use Platform\Hcm\Models\HcmEmployer;
+use Platform\Hcm\Services\HcmLookupService;
 
 class Index extends Component
 {
@@ -73,30 +73,18 @@ class Index extends Component
     #[Computed]
     public function employers()
     {
-        return HcmEmployer::where('team_id', auth()->user()->currentTeam->id)
-            ->where('is_active', true)
-            ->orderBy('employer_number')
-            ->get()
-            ->sortBy('display_name')
-            ->values();
+        return app(HcmLookupService::class)
+            ->employersForSelect(auth()->user()->currentTeam->id);
     }
 
     #[Computed]
     public function modalEmployees()
     {
-        return HcmEmployee::where('team_id', auth()->user()->currentTeam->id)
-            ->when($this->modal_employer_id, fn($q) => $q->where('employer_id', $this->modal_employer_id))
-            ->with('crmContactLinks.contact')
-            ->orderBy('employee_number')
-            ->get()
-            ->map(function ($employee) {
-                $name = $employee->full_name;
-                $nr = $employee->employee_number;
-                return [
-                    'id' => $employee->id,
-                    'label' => $name ? "{$name} ({$nr})" : $nr,
-                ];
-            });
+        return app(HcmLookupService::class)
+            ->employeesForSelect(
+                auth()->user()->currentTeam->id,
+                $this->modal_employer_id ?: null
+            );
     }
 
     #[Computed]
