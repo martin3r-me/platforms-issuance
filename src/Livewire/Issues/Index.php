@@ -53,7 +53,11 @@ class Index extends Component
             ->when($this->filterType, fn($q) => $q->where('issue_type_id', $this->filterType))
             ->when($this->filterEmployer, fn($q) => $q->where('recipient_type', 'hcm_employee')
                 ->whereHas('recipient', fn($q2) => $q2->where('employer_id', $this->filterEmployer)))
-            ->with(['type', 'recipient'])
+            ->with(['type', 'recipient' => function ($morphTo) {
+                $morphTo->morphWith([
+                    \Platform\Hcm\Models\HcmEmployee::class => ['crmContactLinks.contact'],
+                ]);
+            }])
             ->orderBy('issued_at', 'desc')
             ->get();
     }
@@ -86,7 +90,7 @@ class Index extends Component
             ->orderBy('employee_number')
             ->get()
             ->map(function ($employee) {
-                $name = $employee->getContact()?->full_name;
+                $name = $employee->full_name;
                 $nr = $employee->employee_number;
                 return [
                     'id' => $employee->id,

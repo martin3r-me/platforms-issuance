@@ -60,7 +60,7 @@ class IssIssue extends Model
 
         // HcmEmployee
         if ($recipient instanceof \Platform\Hcm\Models\HcmEmployee) {
-            return $recipient->getContact()?->full_name ?? $recipient->employee_number;
+            return $recipient->full_name ?? $recipient->employee_number;
         }
 
         // Fallback: display_name oder name
