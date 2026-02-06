@@ -1,0 +1,30 @@
+{
+    "name": "martin3r/platform-issuance",
+    "description": "Issuance Module for Platform (Ausgabenverwaltung)",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Platform Team",
+            "email": "team@platform.com"
+        }
+    ],
+    "require": {
+        "martin3r/platform-hcm": "*",
+        "barryvdh/laravel-dompdf": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Platform\\Issuance\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Platform\\Issuance\\IssuanceServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
