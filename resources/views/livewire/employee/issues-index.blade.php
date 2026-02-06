@@ -12,19 +12,28 @@
                 </div>
 
                 <div class="flex gap-2 mb-4">
-                <select wire:model.live="filterType" class="text-sm border border-[var(--ui-border)] rounded-md px-3 py-2">
-                    <option value="">Alle Typen</option>
-                    @foreach($this->issueTypes as $type)
-                        <option value="{{ $type->id }}">{{ $type->name }}</option>
-                    @endforeach
-                </select>
-                <select wire:model.live="filterStatus" class="text-sm border border-[var(--ui-border)] rounded-md px-3 py-2">
-                    <option value="all">Alle</option>
-                    <option value="issued">Ausgegeben</option>
-                    <option value="returned">Zurückgegeben</option>
-                    <option value="pending">Ausstehend</option>
-                </select>
-            </div>
+                    <x-ui-input-select
+                        name="filterType"
+                        wire:model.live="filterType"
+                        :options="$this->issueTypes->map(fn($t) => ['id' => $t->id, 'label' => $t->name])->toArray()"
+                        option-value="id"
+                        option-label="label"
+                        placeholder="Alle Typen"
+                    />
+                    <x-ui-input-select
+                        name="filterStatus"
+                        wire:model.live="filterStatus"
+                        :options="[
+                            ['id' => 'all', 'label' => 'Alle'],
+                            ['id' => 'issued', 'label' => 'Ausgegeben'],
+                            ['id' => 'returned', 'label' => 'Zurückgegeben'],
+                            ['id' => 'pending', 'label' => 'Ausstehend'],
+                        ]"
+                        option-value="id"
+                        option-label="label"
+                        placeholder="Status"
+                    />
+                </div>
         </div>
 
         <div class="bg-white rounded-lg border border-[var(--ui-border)]/60 overflow-hidden">

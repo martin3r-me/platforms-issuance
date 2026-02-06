@@ -82,12 +82,15 @@ class Index extends Component
     {
         return HcmEmployee::where('team_id', auth()->user()->currentTeam->id)
             ->when($this->modal_employer_id, fn($q) => $q->where('employer_id', $this->modal_employer_id))
+            ->with('crmContactLinks.contact')
             ->orderBy('employee_number')
             ->get()
             ->map(function ($employee) {
+                $name = $employee->getContact()?->full_name;
+                $nr = $employee->employee_number;
                 return [
                     'id' => $employee->id,
-                    'label' => ($employee->getContact()?->full_name ?? $employee->employee_number) . ' (' . $employee->employee_number . ')'
+                    'label' => $name ? "{$name} ({$nr})" : $nr,
                 ];
             });
     }
