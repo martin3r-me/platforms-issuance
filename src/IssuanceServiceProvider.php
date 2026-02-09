@@ -2,7 +2,6 @@
 
 namespace Platform\Issuance;
 
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -25,11 +24,6 @@ class IssuanceServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Morph-Map für polymorphe Empfänger
-        Relation::morphMap([
-            'hcm_employee' => \Platform\Hcm\Models\HcmEmployee::class,
-        ]);
-
         // Config laden
         $this->mergeConfigFrom(__DIR__.'/../config/issuance.php', 'issuance');
 

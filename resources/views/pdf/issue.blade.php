@@ -97,8 +97,8 @@
         }
 
         .signature-image {
-            max-width: 300px;
-            max-height: 150px;
+            max-width: 100%;
+            max-height: 300px;
             display: block;
             margin-bottom: 10px;
         }
