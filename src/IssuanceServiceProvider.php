@@ -3,7 +3,6 @@
 namespace Platform\Issuance;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Platform\Core\PlatformCore;
@@ -31,7 +30,7 @@ class IssuanceServiceProvider extends ServiceProvider
         if (
             config()->has('issuance.routing') &&
             config()->has('issuance.navigation') &&
-            Schema::hasTable('modules')
+            PlatformCore::modulesTableExists()
         ) {
             PlatformCore::registerModule([
                 'key'        => 'issuance',
